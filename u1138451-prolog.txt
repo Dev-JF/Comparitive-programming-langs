@@ -1,0 +1,118 @@
+% Task 1.1 calls father, checks if the  descendend is male, then calls the function again with the descendendent as father
+maledescend(FATHER, DESCEND):- father(FATHER,DESCEND), male(DESCEND).
+maledescend(FATHER,DESCEND) :-
+	father(FATHER,Z),
+	maledescend(Z,DESCEND).
+
+% Task 1.1 helper functions
+% checks if they are male
+male(X) :- X \= wellesley(_,f,_).
+
+
+% Task 1.2 uses findall to add fathers children to a list if they match the facts
+children(FATHER,CHILDREN) :- findall(CHILDREN,father(FATHER,CHILDREN),CHILDREN).
+
+
+
+
+% Task 1.3 calls the two helper  function, where recursion occurs
+sons(X,Y) :-  sonshelp(X,Z), removeelement(t, Z, Y).
+
+% task 1.3  helper
+ removes an occurence of an element in a list
+removeelement(A, [], []).
+removeelement(X, [Y|K], [Y|M]):- removeelement(X, K, M), (Y \= X).
+removeelement(X, [X|K], R) :- removeelement(X, K, R).
+
+% iterate  through the list, checks if the they are male and put them into the list
+sonshelp([H], Y) :-  male(H) -> append([H], [], Y), !.
+sonshelp([X|Xs], [Y|Ys]) :-  male(X), Y = X, sonshelp(Xs, Ys); Y = t, sonshelp(Xs, Ys), !.
+
+
+% task 1.4  calls the eldest function - does not currently work for wellesley
+
+findeldest(PEOPLE,ELDEST) :- eldest(PEOPLE,ELDEST).
+
+				 
+
+% Task 1.4 helper
+% Takes a list, comapres two people in the list and puts the eldest into y
+eldest([Z], Z).
+eldest([X|Xs], Z):- eldest(Xs, Y), !,( getdate(X,Y) -> Z = X ; Z = Y).
+
+% gets the date from the list element, compares the birst date and returns true or  false
+getdate(X,Z) :- X = wellesley(NAME,GENDER,dates(Y,_)), T is Y,
+				Z = wellesley(GAMES,BENDERS,dates(D,_)), N is D, T < N .
+
+
+
+
+
+
+
+% Task 1.5 problem 
+% This function checks wether the father is the same, then checks if either sibiling is male
+brother(X,Y) :- samefather(X,Y), ismale(Y), not(X=Y) .
+
+
+
+% Task 1.5 helper functions
+
+% This helper function checks wether both people have the same father
+samefather(X,Y) :- father(Z,X), father(Z,Y), not(X=Z).
+
+% This helper function checks if a sibiling is male
+ismale(X) :- X \= wellesley(_,f,_).
+
+
+
+
+
+% Task 2.1 compares the inputed list to the 5 greens, since the program always puts in 5 element list.
+% recursion occurs in the helper function
+
+allgreen(X) :- listmatch(X, [g,g,g,g,g]).
+
+
+
+% task 2.1 helper func checks if two lists are the same
+listmatch(X, X).
+listmatch([Z| V], [Y| U]):-
+    Z=Y,
+    listmatch(V,U).
+
+
+
+% Task 2.2
+charbyindex(INDEX,LIST,ELEMENT) :- id(INDEX,LIST,ELEMENT).
+
+
+% Task 2.2 helper functions,  this is where recursion occurs
+
+id(I,[X|L],E) :- I == 0, E=X, !.
+id(I,[L|Y],E) :- IN is I - 1, id(IN,Y,E).
+
+
+% Task 2.3
+% the overall purpose of this function is to check if the guess matches the Targetlist
+% and put the corresponding answer in the response list
+
+%  This is the base case if there is no elements creates an empty list
+do_guess(TARGETLIST, GUESSLIST, []).
+
+% if X is not a member and not inposition then b will be made the head if resonse
+do_guess(TLIST, [X|GL], ['b'|RL]) :- not(member(X,TLIST)), 
+	not(inpos(TLIST,[X|GL])), !,
+	do_guess(TLIST,GL,RL).
+
+% if X is a member but not inpostion then y be made the head of Response
+do_guess(TLIST, [X|GL], ['y'|RL]) :- member(X,TLIST),
+	not(inpos(TLIST,[X|GL])), !,
+	do_guess(TLIST,GL,RL).
+
+% if X is a member and in position then g will be made the head of the response list
+do_guess(TLIST, [X|GL], ['g'|RL]) :- member(X,TLIST),
+	inpos(TLIST,[X|GL]), !,
+	do_guess(TLIST,GL,RL).
+
+

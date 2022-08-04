@@ -1,0 +1,165 @@
+duoToDec :: String -> Int
+
+duoToDec x = if (x !! 0 == '0') && (x !! 1 == 'd')
+				then    
+					
+						 duoCon (reverse (drop 2 x)) (length (x)-2)
+						
+					
+				else
+				     error "Not a valid duodecimal number: must start with '0d'"
+
+
+
+
+
+-- helper function for task 1.1
+duoCon :: String -> Int -> Int
+
+duoCon str len = 
+  if charToInt' (str !! (len -1)) == 100
+  then
+	error "Not a valid duodecimal number: contains invalid digit"
+	
+  else
+	
+	if len == 1
+	then charToInt' (str !! (len -1)) * (12 ^ (len -1))
+	else 
+	 
+	 charToInt' (str !! (len - 1)) * (12 ^ (len -1)) + duoCon str (len -1)
+
+
+			
+
+charToInt' :: Char -> Int
+
+charToInt' i
+		| i == '0' = 0 
+		| i == '1' = 1
+		| i == '2' = 2
+		| i == '3' = 3
+		| i == '4' = 4
+		| i == '5' = 5
+		| i == '6' = 6
+		| i == '7' = 7
+		| i == '8' = 8
+		| i == '9' = 9
+		| i == 'A' = 10
+		| i == 'B' = 11
+		| otherwise = 100
+
+
+
+
+-- Task 1.2 
+decToDuo :: Int -> String
+decToDuo = reverse . conDuo
+  where conDuo x
+		  | x < 12    = [ intToChar x ] ++ "d0"
+		  | otherwise = let (y,z) = x `divMod` 12
+                        in (intToChar z) : conDuo y 
+
+
+
+
+
+intToChar :: Int -> Char
+
+intToChar i
+	| i == 0 = '0' 
+	| i == 1 = '1'
+	| i == 2 = '2'
+	| i == 3 = '3'
+	| i == 4 = '4'
+	| i == 5 = '5'
+	| i == 6 = '6'
+	| i == 7 = '7'
+	| i == 8 = '8'
+	| i == 9 = '9'
+	| i == 10 = 'A'
+	| i == 11 = 'B'
+	
+
+
+
+
+
+--task 2.1
+leftRight :: [Int] -> [Int]
+ 
+ 
+leftRight [x]
+			| [x] == [1] || [x] == [2] = [-1]
+			| [x] == [3] || [x] == [4] || [x] == [5] || [x] == [6] ||[x] == [7] || [x] == [8] = [0]
+			| [x] == [9] || [x] == [10] = [1]
+leftRight (x:xs)
+			| [x] == [1] || [x] == [2] = [-1] ++ leftRight xs
+			| [x] == [3] || [x] == [4] || [x] == [5] || [x] == [6] ||[x] == [7] || [x] == [8] = [0]  ++ leftRight xs
+			| [x] == [9] || [x] == [10] = [1]  ++ leftRight xs
+			
+			
+-- task 2.2 function 1
+frontBack :: [Int] -> [Int]
+frontBack [x]
+			| [x] == [1] || [x] == [2] || [x] == [3] = [-1] 
+			| [x] == [4] || [x] == [5] || [x] == [6] || [x] == [7] || [x] == [8] || [x] == [9] || [x] == [10] = [1] 
+frontBack (x:xs)
+			| [x] == [1] || [x] == [2] || [x] == [3] = [-1] ++ frontBack xs
+			| [x] == [4] || [x] == [5] || [x] == [6] || [x] == [7] || [x] == [8] || [x] == [9] || [x] == [10] = [1] ++ frontBack xs
+			
+			
+
+-- task 2.2 function 2
+
+--task 2.2 map for function
+mapFront :: Int -> Int
+mapFront x
+	 | x == 1 || x == 2 || x == 3 = -1 
+	 | x == 4 || x == 5 || x == 6 || x == 7 || x == 8 || x == 9 || x == 10 = 1 
+
+-- application of the map
+frontBack' :: [Int] -> [Int]
+frontBack' y = map mapFront y
+
+
+-- task 2.3 
+takeStep :: [Int] -> [Int] -> [(Int, Int)]
+takeStep [x] [y] = [(x, y)]
+takeStep (x:xs) (y:ys) =  (x, y) : takeStep xs ys 
+
+
+
+-- task  2.4 
+
+walkEnd :: [(Int, Int)] -> (Int, Int)
+walkEnd [(x)] = x
+walkEnd (x:xs) = addTupes (walkEnd xs) x
+
+
+-- 2.4 helper function
+addTupes :: (Int, Int) -> (Int, Int) -> (Int, Int)
+addTupes (x, y) (a, b) = (x+a, y+b)
+
+
+
+
+-- task 2.5 
+walkPath :: Int -> [(Int,Int)] -> [(Int,Int)]
+walkPath x y
+			| x == 1 = [(0,0)] ++ [(y !! (x-1))]
+walkPath x y = if x == 2 then [(0,0)] ++ [(y !! (x-2))] ++ addTupes' (y !! (x-1)) (y !! (x-2))
+							else  walkPath (x-1) y ++ addTupes' (y !! (x-1)) (index (x-1) (walkPath (x-1) y))
+		  
+		  
+
+
+-- task 2.5 helper functions
+addTupes' :: (Int, Int) -> (Int, Int) -> [(Int, Int)]
+addTupes' (x, y) (a, b) = [(x+a, y+b)]
+
+
+
+
+index :: Int -> [(Int,Int)] -> (Int, Int)
+index x y = (y !! x)
